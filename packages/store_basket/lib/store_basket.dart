@@ -5,7 +5,9 @@ import 'package:store_basket/product.dart';
 import 'shoping_cart.dart';
 
 class StoreBasket extends StatefulWidget {
-  const StoreBasket({Key? key}) : super(key: key);
+  final void Function(String name, Object data)? onBroadcast;
+
+  const StoreBasket({Key? key, this.onBroadcast}) : super(key: key);
 
   @override
   StoreBasketState createState() => StoreBasketState();
@@ -17,12 +19,13 @@ class StoreBasketState extends State<StoreBasket> {
   @override
   void initState() {
     super.initState();
-    shoppingCart = ShoppingCart();
+    shoppingCart = ShoppingCart(widget.onBroadcast);
   }
 
   ShoppingCart getShoppingCart() {
     return shoppingCart;
   }
+
 
   @override
   Widget build(BuildContext context) {

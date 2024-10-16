@@ -1,94 +1,108 @@
 library store_basket;
 
 import 'package:flutter/material.dart';
-import 'product.dart';
-
+import 'package:store_basket/product.dart';
 import 'shoping_cart.dart';
 
-class StoreBasketWidget extends StatefulWidget {
-  final List<Product> products; // Dodaj pole do przechowywania produktów
+class StoreBasket extends StatefulWidget {
+  const StoreBasket({Key? key}) : super(key: key);
 
-  StoreBasketWidget(
-      {required this.products}); // Konstruktor z wymaganym argumentem
   @override
-  _StoreBasketWidgetState createState() => _StoreBasketWidgetState();
+  StoreBasketState createState() => StoreBasketState();
 }
 
-class _StoreBasketWidgetState extends State<StoreBasketWidget> {
+class StoreBasketState extends State<StoreBasket> {
   late final ShoppingCart shoppingCart;
 
   @override
   void initState() {
     super.initState();
-    shoppingCart = ShoppingCart(widget.products); // Inicjalizacja koszyka z produktami
+    shoppingCart = ShoppingCart();
+  }
+
+  ShoppingCart getShoppingCart() {
+    return shoppingCart;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shopping Cart'),
+        title: const Text('Shopping Cart'),
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: ListView.builder(
-              itemCount: shoppingCart.products.length,
-              itemBuilder: (context, index) {
-                final product = shoppingCart.products[index];
-                return Card(
-                  margin: EdgeInsets.all(8.0),
-                  elevation: 4,
-                  child: ListTile(
-                    title: Text(
-                      product.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.remove),
-                          onPressed: () => setState(
-                              () => shoppingCart.removeProduct(product.id)),
-                        ),
-                        Text(shoppingCart.cart[product.id]?.toString() ?? '0'),
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          onPressed: () => setState(
-                              () => shoppingCart.addProduct(product.id)),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: ValueListenableBuilder<List<Product>>(
+              valueListenable: shoppingCart,
+              builder: (context, cart, child) {
+                return Column(
                   children: [
-                    Text(
-                      'Total Price:',
-                      style: TextStyle(fontSize: 14), // Smaller font size
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: cart.length,
+                        itemBuilder: (context, index) {
+                          final product = cart[index];
+                          return Card(
+                            margin: const EdgeInsets.all(8.0),
+                            elevation: 4,
+                            child: ListTile(
+                              title: Text(
+                                product.name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(
+                                  'PLN ${product.price.toStringAsFixed(2)}'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () => setState(() =>
+                                        shoppingCart.removeProduct(product.id)),
+                                  ),
+                                  Text(shoppingCart.cart[product.id]
+                                          ?.toString() ??
+                                      '0'),
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () => setState(() =>
+                                        shoppingCart.increment(product.id)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    Text(
-                      '\$${shoppingCart.getTotalPrice().toStringAsFixed(2)}',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight:
-                              FontWeight.bold), // Slightly smaller font size
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Total Price:',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              Text(
+                                'PLN ${shoppingCart.getTotalPrice().toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
-                ),
-              ),
+                );
+              },
             ),
           ),
           Padding(
@@ -99,11 +113,11 @@ class _StoreBasketWidgetState extends State<StoreBasketWidget> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text("Order"),
-                      content: Text("Your order has been placed!"),
+                      title: const Text("Order"),
+                      content: const Text("Your order has been placed!"),
                       actions: [
                         TextButton(
-                          child: Text("OK"),
+                          child: const Text("OK"),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -111,10 +125,15 @@ class _StoreBasketWidgetState extends State<StoreBasketWidget> {
                   },
                 );
               },
-              child: Text('Place Order'),
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                textStyle: TextStyle(fontSize: 18), // Larger button text
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0, vertical: 16.0),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+              child: const Text(
+                'Place Order',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ),
           ),
